@@ -1,0 +1,15 @@
+openapi: 3.0.3
+info:
+  title: Multi-DRM Gateway
+  description: |
+    Language-agnostic API contract for the Multi-DRM Gateway.
+    This spec is the single source of truth for all implementations.
+  version: 1.0.0
+
+servers:
+  - url: https://api.example.com
+
+paths: {}
+
+components:
+  schemas: {}
