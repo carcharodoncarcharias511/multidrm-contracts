@@ -1,9 +1,14 @@
 openapi: 3.0.3
+
 info:
   title: Multi-DRM Gateway
   description: |
     Language-agnostic API contract for the Multi-DRM Gateway.
-    This spec is the single source of truth for all implementations.
+
+    The gateway exposes a synchronous, stateless HTTP API.
+    Every request is assigned a server-generated request identifier
+    returned via the X-Request-Id response header for observability
+    and correlation.
   version: 1.0.0
 
 servers:
@@ -12,4 +17,94 @@ servers:
 paths: {}
 
 components:
-  schemas: {}
+
+  headers:
+    X-Request-Id:
+      description: >
+        Server-generated opaque identifier for correlating requests
+        across services and logs.
+      schema:
+        type: string
+
+  schemas:
+
+    Error:
+      type: object
+      required:
+        - code
+        - message
+        - retryable
+        - request_id
+      properties:
+        code:
+          type: string
+          description: >
+            Stable, machine-readable error code.
+            Must not change once published.
+          example: DRM_POLICY_DENIED
+        message:
+          type: string
+          description: Human-readable description of the error.
+          example: Device is not allowed to receive licenses
+        retryable:
+          type: boolean
+          description: >
+            Indicates whether the client may retry the request
+            with the expectation that it could succeed.
+          example: false
+        request_id:
+          type: string
+          description: >
+            Request identifier assigned by the gateway.
+            Matches the X-Request-Id response header.
+          example: c0a80123-9d8e-4c3b-9b3d-1f2b6a3e4f01
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          $ref: "#/components/schemas/Error"
+
+  responses:
+
+    BadRequest:
+      description: Malformed or invalid request
+      headers:
+        X-Request-Id:
+          $ref: "#/components/headers/X-Request-Id"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    Unauthorized:
+      description: Authentication failed
+      headers:
+        X-Request-Id:
+          $ref: "#/components/headers/X-Request-Id"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    Forbidden:
+      description: Request denied by policy or DRM provider
+      headers:
+        X-Request-Id:
+          $ref: "#/components/headers/X-Request-Id"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    InternalError:
+      description: Internal gateway error
+      headers:
+        X-Request-Id:
+          $ref: "#/components/headers/X-Request-Id"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
