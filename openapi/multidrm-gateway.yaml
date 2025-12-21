@@ -14,7 +14,50 @@ info:
 servers:
   - url: https://api.example.com
 
-paths: {}
+paths:
+  /v1/licenses:
+    post:
+      summary: Issue DRM license or certificate
+      description: |
+        Accepts a DRM-generated message (license challenge or provisioning request)
+        and returns the corresponding DRM response.
+
+        The gateway determines whether the request represents a certificate
+        provisioning or a license issuance based on the DRM payload.
+        Clients must not infer or specify request type.
+      operationId: issueLicense
+      tags:
+        - License
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LicenseRequest"
+
+      responses:
+        "200":
+          description: DRM response successfully generated
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/X-Request-Id"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LicenseResponse"
+
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+        "500":
+          $ref: "#/components/responses/InternalError"
 
 components:
 
@@ -27,6 +70,70 @@ components:
         type: string
 
   schemas:
+
+    LicenseRequest:
+      type: object
+      required:
+        - drm_system
+        - content_id
+        - challenge
+      properties:
+        drm_system:
+          type: string
+          description: DRM system for which the license is requested.
+          enum:
+            - widevine
+            - playready
+            - fairplay
+          example: widevine
+
+        content_id:
+          type: string
+          description: >
+            Identifier of the content or asset for which the license
+            is being requested.
+          example: movie-12345
+
+        challenge:
+          type: string
+          format: byte
+          description: >
+            Base64-encoded DRM license challenge provided by the client.
+          example: AAAANHBzc2gAAAAAmgRSAAAA...
+
+        client_id:
+          type: string
+          description: Identifier of the calling client or application.
+          example: web-player    
+
+    LicenseResponse:
+      type: object
+      required:
+        - drm_system
+        - license
+      properties:
+        drm_system:
+          type: string
+          description: DRM system for which the license was issued.
+          enum:
+            - widevine
+            - playready
+            - fairplay
+          example: widevine
+
+        license:
+          type: string
+          format: byte
+          description: >
+            Base64-encoded DRM license issued by the DRM provider.
+          example: AAAAXGxpY2Vuc2UAAAA...
+
+        expires_at:
+          type: string
+          format: date-time
+          description: >
+            Optional expiration time of the license, if known.
+          example: "2025-01-01T00:00:00Z"
 
     Error:
       type: object
