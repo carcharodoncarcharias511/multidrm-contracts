@@ -45,12 +45,12 @@ paths:
           content:
             application/json:
               schema:
-          allOf:
-            - $ref: "#/components/schemas/SuccessEnvelope"
-            - type: object
-              properties:
-                data:
-                  $ref: "#/components/schemas/LicenseResponse"
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/LicenseResponse"
         "400":
           $ref: "#/components/responses/BadRequest"
 
