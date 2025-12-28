@@ -25,3 +25,10 @@ Multi-DRM Gateway.
 
 This repository is versioned independently.
 Gateway implementations pin a specific contract version.
+
+## Contract validation
+
+Before committing any OpenAPI changes, run:
+
+```bash
+./scripts/validate.sh
