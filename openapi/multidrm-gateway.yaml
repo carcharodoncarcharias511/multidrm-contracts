@@ -63,6 +63,26 @@ paths:
         "500":
           $ref: "#/components/responses/InternalError"
 
+  /v1/fairplay/certificate:
+    post:
+      summary: Retrieve FairPlay application certificate
+      operationId: getFairPlayCertificate
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FairPlayCertificateRequest'
+      responses:
+        '200':
+          description: FairPlay certificate
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FairPlayCertificateResponse'
+
 components:
 
   headers:
@@ -87,20 +107,6 @@ components:
         data:
           type: object
           additionalProperties: true
-
-    # ErrorResponse:
-    #   type: object
-    #   required:
-    #     - code
-    #     - message
-    #     - request_id
-    #   properties:
-    #     code:
-    #       type: string
-    #     message:
-    #       type: string
-    #     request_id:
-    #       type: string
 
     LicenseRequest:
       type: object
@@ -204,6 +210,31 @@ components:
       properties:
         error:
           $ref: "#/components/schemas/Error"
+
+    FairPlayCertificateRequest:
+      type: object
+      required:
+        - application_id
+      properties:
+        application_id:
+          type: string
+          description: >
+            Identifier of the FairPlay application / player instance.
+            Used to select the correct certificate.
+        client_id:
+          type: string
+          description: Optional client identifier for audit/debug
+
+    FairPlayCertificateResponse:
+      type: object
+      required:
+        - certificate
+      properties:
+        certificate:
+          type: string
+          format: byte
+          description: >
+            Base64-encoded FairPlay application certificate.
 
   responses:
 
